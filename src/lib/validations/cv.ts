@@ -93,6 +93,40 @@ export const cvEducationsSchema = z.object({
   educations: z.array(cvEducationItemSchema).max(30, "Pendidikan maksimal 30 entri"),
 });
 
+export const cvSkillItemSchema = z.object({
+  name: z.string().trim().min(1, "Nama keahlian wajib diisi").max(120, "Nama keahlian terlalu panjang"),
+  category: z.string().trim().max(80, "Kategori keahlian terlalu panjang").default(""),
+});
+
+export const cvSkillsSchema = z.object({
+  skills: z.array(cvSkillItemSchema).max(100, "Keahlian maksimal 100 entri"),
+});
+
+export const cvCertificationItemSchema = z.object({
+  name: z.string().trim().min(1, "Nama sertifikasi wajib diisi").max(160, "Nama sertifikasi terlalu panjang"),
+  issuer: z.string().trim().min(1, "Penerbit wajib diisi").max(160, "Nama penerbit terlalu panjang"),
+  issueDate: z.string().trim().regex(/^\d{4}-\d{2}$/, "Tanggal sertifikasi wajib diisi (format: YYYY-MM)"),
+  url: optionalUrlField,
+});
+
+export const cvCertificationsSchema = z.object({
+  certifications: z.array(cvCertificationItemSchema).max(50, "Sertifikasi maksimal 50 entri"),
+});
+
+export const cvProjectItemSchema = z.object({
+  name: z.string().trim().min(1, "Nama proyek wajib diisi").max(160, "Nama proyek terlalu panjang"),
+  description: z.string().trim().min(1, "Deskripsi proyek wajib diisi").max(2000, "Deskripsi proyek terlalu panjang"),
+  url: optionalUrlField,
+  technologies: z
+    .array(z.string().trim().min(1, "Teknologi tidak boleh kosong").max(120, "Nama teknologi terlalu panjang"))
+    .max(30, "Teknologi maksimal 30 item")
+    .default([]),
+});
+
+export const cvProjectsSchema = z.object({
+  projects: z.array(cvProjectItemSchema).max(30, "Proyek maksimal 30 entri"),
+});
+
 export type CvPersonalInfoInput = z.input<typeof cvPersonalInfoSchema>;
 export type CvPersonalInfoOutput = z.output<typeof cvPersonalInfoSchema>;
 export type CvSummaryInput = z.input<typeof cvSummarySchema>;
@@ -100,3 +134,9 @@ export type CvExperienceInput = z.input<typeof cvExperienceItemSchema>;
 export type CvExperiencesInput = z.input<typeof cvExperiencesSchema>;
 export type CvEducationInput = z.input<typeof cvEducationItemSchema>;
 export type CvEducationsInput = z.input<typeof cvEducationsSchema>;
+export type CvSkillInput = z.input<typeof cvSkillItemSchema>;
+export type CvSkillsInput = z.input<typeof cvSkillsSchema>;
+export type CvCertificationInput = z.input<typeof cvCertificationItemSchema>;
+export type CvCertificationsInput = z.input<typeof cvCertificationsSchema>;
+export type CvProjectInput = z.input<typeof cvProjectItemSchema>;
+export type CvProjectsInput = z.input<typeof cvProjectsSchema>;

@@ -2,9 +2,12 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { FormStepper } from "@/components/cv-builder/form-stepper";
+import { CertificationsForm } from "@/components/cv-builder/certifications-form";
 import { EducationsForm } from "@/components/cv-builder/educations-form";
 import { ExperiencesForm } from "@/components/cv-builder/experiences-form";
 import { PersonalInfoForm } from "@/components/cv-builder/personal-info-form";
+import { ProjectsForm } from "@/components/cv-builder/projects-form";
+import { SkillsForm } from "@/components/cv-builder/skills-form";
 import { SummaryForm } from "@/components/cv-builder/summary-form";
 import { AUTH_SESSION_COOKIE_NAME, parseAuthSession } from "@/lib/auth/session";
 import { createDefaultCvData, type CvData } from "@/lib/cv/default-data";
@@ -75,6 +78,11 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
   const educations = Array.isArray(currentData.educations)
     ? currentData.educations
     : DEFAULT_CV_DATA.educations;
+  const skills = Array.isArray(currentData.skills) ? currentData.skills : DEFAULT_CV_DATA.skills;
+  const certifications = Array.isArray(currentData.certifications)
+    ? currentData.certifications
+    : DEFAULT_CV_DATA.certifications;
+  const projects = Array.isArray(currentData.projects) ? currentData.projects : DEFAULT_CV_DATA.projects;
   const activeStep = SECTION_TO_STEP[section] ?? 0;
 
   function renderSectionForm(): React.ReactNode {
@@ -87,6 +95,12 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
         return <ExperiencesForm cvId={id} initialValues={{ experiences }} />;
       case "educations":
         return <EducationsForm cvId={id} initialValues={{ educations }} />;
+      case "skills":
+        return <SkillsForm cvId={id} initialValues={{ skills }} />;
+      case "certifications":
+        return <CertificationsForm cvId={id} initialValues={{ certifications }} />;
+      case "projects":
+        return <ProjectsForm cvId={id} initialValues={{ projects }} />;
       default:
         return <p className="text-sm text-gray-600">Form untuk section ini akan tersedia di story berikutnya.</p>;
     }

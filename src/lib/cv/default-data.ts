@@ -25,19 +25,21 @@ export type CvData = {
     endDate: string;
     gpa: string;
   }>;
-  skills: string[];
+  skills: Array<{
+    name: string;
+    category: string;
+  }>;
   certifications: Array<{
     name: string;
     issuer: string;
     issueDate: string;
-    credentialId: string;
+    url: string;
   }>;
   projects: Array<{
     name: string;
-    role: string;
     description: string;
     technologies: string[];
-    link: string;
+    url: string;
   }>;
 };
 

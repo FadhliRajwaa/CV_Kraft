@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  cvCertificationsSchema,
   cvEducationsSchema,
   cvExperiencesSchema,
   cvPersonalInfoSchema,
+  cvProjectsSchema,
+  cvSkillsSchema,
   cvSummarySchema,
 } from "@/lib/validations/cv";
 
@@ -215,6 +218,91 @@ describe("cvEducationsSchema", () => {
           startDate: "2022-08",
           endDate: "2021-06",
           gpa: "3.75",
+        },
+      ],
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+});
+
+describe("cvSkillsSchema", () => {
+  it("sukses untuk payload skills valid", () => {
+    const parsed = cvSkillsSchema.safeParse({
+      skills: [
+        { name: "TypeScript", category: "Programming Language" },
+        { name: "React", category: "Frontend" },
+      ],
+    });
+
+    expect(parsed.success).toBe(true);
+  });
+
+  it("gagal jika nama skill kosong", () => {
+    const parsed = cvSkillsSchema.safeParse({
+      skills: [{ name: "", category: "Frontend" }],
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+});
+
+describe("cvCertificationsSchema", () => {
+  it("sukses untuk payload certifications valid", () => {
+    const parsed = cvCertificationsSchema.safeParse({
+      certifications: [
+        {
+          name: "AWS Certified Cloud Practitioner",
+          issuer: "Amazon Web Services",
+          issueDate: "2025-01",
+          url: "https://example.com/cert/aws-cp",
+        },
+      ],
+    });
+
+    expect(parsed.success).toBe(true);
+  });
+
+  it("gagal jika tanggal sertifikasi tidak valid", () => {
+    const parsed = cvCertificationsSchema.safeParse({
+      certifications: [
+        {
+          name: "AWS Certified Cloud Practitioner",
+          issuer: "Amazon Web Services",
+          issueDate: "2025",
+          url: "",
+        },
+      ],
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+});
+
+describe("cvProjectsSchema", () => {
+  it("sukses untuk payload projects valid", () => {
+    const parsed = cvProjectsSchema.safeParse({
+      projects: [
+        {
+          name: "CVKraft",
+          description: "Platform untuk membuat CV ATS-friendly.",
+          url: "https://example.com/cvkraft",
+          technologies: ["Next.js", "TypeScript", "Prisma"],
+        },
+      ],
+    });
+
+    expect(parsed.success).toBe(true);
+  });
+
+  it("gagal jika deskripsi proyek kosong", () => {
+    const parsed = cvProjectsSchema.safeParse({
+      projects: [
+        {
+          name: "CVKraft",
+          description: "",
+          url: "",
+          technologies: [],
         },
       ],
     });
