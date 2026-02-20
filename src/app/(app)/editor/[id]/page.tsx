@@ -10,6 +10,7 @@ import { PersonalInfoForm } from "@/components/cv-builder/personal-info-form";
 import { ProjectsForm } from "@/components/cv-builder/projects-form";
 import { SkillsForm } from "@/components/cv-builder/skills-form";
 import { SummaryForm } from "@/components/cv-builder/summary-form";
+import { TemplateSelector } from "@/components/cv-builder/template-selector";
 import { AUTH_SESSION_COOKIE_NAME, parseAuthSession } from "@/lib/auth/session";
 import { createDefaultCvData, type CvData } from "@/lib/cv/default-data";
 import { prisma } from "@/lib/prisma";
@@ -65,6 +66,7 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
     select: {
       userId: true,
       title: true,
+      templateId: true,
       language: true,
       data: true,
     },
@@ -96,6 +98,7 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
   const projects = arrayOrDefault(currentData.projects, DEFAULT_CV_DATA.projects);
   const orderedSections = sanitizeSectionOrder(currentData.sectionOrder);
   const language = cv.language === "en" ? "en" : "id";
+  const templateId = cv.templateId;
 
   function renderSectionForm(): React.ReactNode {
     switch (section) {
@@ -129,6 +132,7 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
         <aside className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-600">Form Section</h2>
           <LanguageSelector cvId={id} value={language} />
+          <TemplateSelector cvId={id} value={templateId} />
           <FormStepper activeSection={section} cvId={id} language={language} orderedSections={orderedSections} />
         </aside>
 
