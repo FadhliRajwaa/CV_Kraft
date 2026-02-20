@@ -4,7 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 
+import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
+import { useAutoSave } from "@/hooks/use-auto-save";
+import { createAutoSaveFetcher, createSchemaValidator } from "@/lib/cv/auto-save-helpers";
 import {
   cvCertificationsSchema,
   type CvCertificationInput,
@@ -34,6 +37,7 @@ export function CertificationsForm({ cvId, initialValues }: CertificationsFormPr
     control,
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<CvCertificationsInput>({
     mode: "onBlur",
@@ -43,6 +47,18 @@ export function CertificationsForm({ cvId, initialValues }: CertificationsFormPr
   const { fields, append, remove } = useFieldArray({
     control,
     name: "certifications",
+  });
+
+  const certificationsValidator = createSchemaValidator(cvCertificationsSchema);
+
+  const autoSave = useAutoSave<CvCertificationsInput, CvCertificationsInput>({
+    control,
+    reset,
+    storageKey: `cv:${cvId}:certifications`,
+    parseDraft: certificationsValidator,
+    toPayload: certificationsValidator,
+    save: createAutoSaveFetcher(`/api/cv/${cvId}/certifications`),
+    onUnauthorized: () => router.push("/login"),
   });
 
   async function onSubmit(values: CvCertificationsInput): Promise<void> {
@@ -178,6 +194,7 @@ export function CertificationsForm({ cvId, initialValues }: CertificationsFormPr
           {isSubmitting ? "Menyimpan..." : "Simpan Sertifikasi"}
         </Button>
       </div>
+      <AutoSaveIndicator status={autoSave.status} lastSavedAt={autoSave.lastSavedAt} />
 
       {serverError ? <p className="text-sm text-red-600">{serverError}</p> : null}
       {successMessage ? <p className="text-sm text-green-700">{successMessage}</p> : null}

@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 
+import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
+import { useAutoSave } from "@/hooks/use-auto-save";
+import { createAutoSaveFetcher, createSchemaValidator } from "@/lib/cv/auto-save-helpers";
 import { cvSummarySchema, type CvSummaryInput } from "@/lib/validations/cv";
 
 type SummaryFormProps = {
@@ -25,6 +28,7 @@ export function SummaryForm({ cvId, initialValues }: SummaryFormProps) {
     register,
     control,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<CvSummaryInput>({
     resolver: zodResolver(cvSummarySchema),
@@ -33,6 +37,18 @@ export function SummaryForm({ cvId, initialValues }: SummaryFormProps) {
   });
 
   const summaryValue = useWatch({ control, name: "summary" }) ?? "";
+
+  const summaryValidator = createSchemaValidator(cvSummarySchema);
+
+  const autoSave = useAutoSave<CvSummaryInput, CvSummaryInput>({
+    control,
+    reset,
+    storageKey: `cv:${cvId}:summary`,
+    parseDraft: summaryValidator,
+    toPayload: summaryValidator,
+    save: createAutoSaveFetcher(`/api/cv/${cvId}/summary`),
+    onUnauthorized: () => router.push("/login"),
+  });
 
   async function onSubmit(values: CvSummaryInput): Promise<void> {
     setServerError("");
@@ -88,9 +104,12 @@ export function SummaryForm({ cvId, initialValues }: SummaryFormProps) {
       {serverError ? <p className="text-sm text-red-600">{serverError}</p> : null}
       {successMessage ? <p className="text-sm text-green-700">{successMessage}</p> : null}
 
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Menyimpan..." : "Simpan Ringkasan"}
-      </Button>
+      <div className="space-y-1">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Menyimpan..." : "Simpan Ringkasan"}
+        </Button>
+        <AutoSaveIndicator status={autoSave.status} lastSavedAt={autoSave.lastSavedAt} />
+      </div>
     </form>
   );
 }

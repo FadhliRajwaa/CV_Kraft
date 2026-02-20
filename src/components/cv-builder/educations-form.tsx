@@ -4,7 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 
+import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
+import { useAutoSave } from "@/hooks/use-auto-save";
+import { createAutoSaveFetcher, createSchemaValidator } from "@/lib/cv/auto-save-helpers";
 import { cvEducationsSchema, type CvEducationInput, type CvEducationsInput } from "@/lib/validations/cv";
 
 type EducationsFormProps = {
@@ -32,6 +35,7 @@ export function EducationsForm({ cvId, initialValues }: EducationsFormProps) {
     control,
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<CvEducationsInput>({
     mode: "onBlur",
@@ -41,6 +45,18 @@ export function EducationsForm({ cvId, initialValues }: EducationsFormProps) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "educations",
+  });
+
+  const educationsValidator = createSchemaValidator(cvEducationsSchema);
+
+  const autoSave = useAutoSave<CvEducationsInput, CvEducationsInput>({
+    control,
+    reset,
+    storageKey: `cv:${cvId}:educations`,
+    parseDraft: educationsValidator,
+    toPayload: educationsValidator,
+    save: createAutoSaveFetcher(`/api/cv/${cvId}/educations`),
+    onUnauthorized: () => router.push("/login"),
   });
 
   async function onSubmit(values: CvEducationsInput): Promise<void> {
@@ -206,6 +222,7 @@ export function EducationsForm({ cvId, initialValues }: EducationsFormProps) {
           {isSubmitting ? "Menyimpan..." : "Simpan Pendidikan"}
         </Button>
       </div>
+      <AutoSaveIndicator status={autoSave.status} lastSavedAt={autoSave.lastSavedAt} />
 
       {serverError ? <p className="text-sm text-red-600">{serverError}</p> : null}
       {successMessage ? <p className="text-sm text-green-700">{successMessage}</p> : null}

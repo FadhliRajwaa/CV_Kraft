@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
+import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
-import {
-  cvPersonalInfoSchema,
-  type CvPersonalInfoInput,
-} from "@/lib/validations/cv";
+import { useAutoSave } from "@/hooks/use-auto-save";
+import { createAutoSaveFetcher, createSchemaValidator } from "@/lib/cv/auto-save-helpers";
+import { cvPersonalInfoSchema, type CvPersonalInfoInput } from "@/lib/validations/cv";
 
 type PersonalInfoFormProps = {
   cvId: string;
@@ -79,13 +79,27 @@ export function PersonalInfoForm({ cvId, initialValues }: PersonalInfoFormProps)
   const router = useRouter();
 
   const {
+    control,
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<CvPersonalInfoInput>({
     resolver: zodResolver(cvPersonalInfoSchema),
     mode: "onBlur",
     defaultValues: initialValues,
+  });
+
+  const personalInfoValidator = createSchemaValidator(cvPersonalInfoSchema);
+
+  const autoSave = useAutoSave<CvPersonalInfoInput, CvPersonalInfoInput>({
+    control,
+    reset,
+    storageKey: `cv:${cvId}:personal-info`,
+    parseDraft: personalInfoValidator,
+    toPayload: personalInfoValidator,
+    save: createAutoSaveFetcher(`/api/cv/${cvId}/personal-info`),
+    onUnauthorized: () => router.push("/login"),
   });
 
   async function onSubmit(values: CvPersonalInfoInput): Promise<void> {
@@ -144,9 +158,12 @@ export function PersonalInfoForm({ cvId, initialValues }: PersonalInfoFormProps)
       {serverError ? <p className="text-sm text-red-600">{serverError}</p> : null}
       {successMessage ? <p className="text-sm text-green-700">{successMessage}</p> : null}
 
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Menyimpan..." : "Simpan Data Pribadi"}
-      </Button>
+      <div className="space-y-1">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Menyimpan..." : "Simpan Data Pribadi"}
+        </Button>
+        <AutoSaveIndicator status={autoSave.status} lastSavedAt={autoSave.lastSavedAt} />
+      </div>
     </form>
   );
 }

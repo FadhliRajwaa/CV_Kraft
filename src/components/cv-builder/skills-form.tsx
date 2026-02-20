@@ -4,7 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 
+import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
+import { useAutoSave } from "@/hooks/use-auto-save";
+import { createAutoSaveFetcher, createSchemaValidator } from "@/lib/cv/auto-save-helpers";
 import { cvSkillsSchema, type CvSkillInput, type CvSkillsInput } from "@/lib/validations/cv";
 
 type SkillsFormProps = {
@@ -28,6 +31,7 @@ export function SkillsForm({ cvId, initialValues }: SkillsFormProps) {
     control,
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<CvSkillsInput>({
     mode: "onBlur",
@@ -37,6 +41,18 @@ export function SkillsForm({ cvId, initialValues }: SkillsFormProps) {
   const { fields, append, remove, swap } = useFieldArray({
     control,
     name: "skills",
+  });
+
+  const skillsValidator = createSchemaValidator(cvSkillsSchema);
+
+  const autoSave = useAutoSave<CvSkillsInput, CvSkillsInput>({
+    control,
+    reset,
+    storageKey: `cv:${cvId}:skills`,
+    parseDraft: skillsValidator,
+    toPayload: skillsValidator,
+    save: createAutoSaveFetcher(`/api/cv/${cvId}/skills`),
+    onUnauthorized: () => router.push("/login"),
   });
 
   async function onSubmit(values: CvSkillsInput): Promise<void> {
@@ -153,6 +169,7 @@ export function SkillsForm({ cvId, initialValues }: SkillsFormProps) {
           {isSubmitting ? "Menyimpan..." : "Simpan Keahlian"}
         </Button>
       </div>
+      <AutoSaveIndicator status={autoSave.status} lastSavedAt={autoSave.lastSavedAt} />
 
       {serverError ? <p className="text-sm text-red-600">{serverError}</p> : null}
       {successMessage ? <p className="text-sm text-green-700">{successMessage}</p> : null}

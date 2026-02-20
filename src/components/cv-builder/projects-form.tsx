@@ -4,7 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 
+import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
+import { useAutoSave } from "@/hooks/use-auto-save";
+import { createAutoSaveFetcher } from "@/lib/cv/auto-save-helpers";
 import { cvProjectsSchema, type CvProjectInput, type CvProjectsInput } from "@/lib/validations/cv";
 
 type ProjectsFormProps = {
@@ -38,6 +41,7 @@ export function ProjectsForm({ cvId, initialValues }: ProjectsFormProps) {
     control,
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<ProjectsFormValues>({
     mode: "onBlur",
@@ -52,6 +56,67 @@ export function ProjectsForm({ cvId, initialValues }: ProjectsFormProps) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "projects",
+  });
+
+  const autoSave = useAutoSave<ProjectsFormValues, CvProjectsInput>({
+    control,
+    reset,
+    storageKey: `cv:${cvId}:projects`,
+    parseDraft: (draft) => {
+      const fromPayload = cvProjectsSchema.safeParse(draft);
+
+      if (fromPayload.success) {
+        return {
+          projects: fromPayload.data.projects.map((item) => ({
+            ...item,
+            technologiesText: item.technologies.join("\n"),
+          })),
+        };
+      }
+
+      if (!draft || typeof draft !== "object") {
+        return null;
+      }
+
+      const candidate = (draft as { projects?: unknown }).projects;
+
+      if (!Array.isArray(candidate)) {
+        return null;
+      }
+
+      return {
+        projects: candidate.map((item): ProjectFormItem => {
+          if (!item || typeof item !== "object") {
+            return EMPTY_PROJECT;
+          }
+
+          return {
+            name: typeof item.name === "string" ? item.name : "",
+            description: typeof item.description === "string" ? item.description : "",
+            url: typeof item.url === "string" ? item.url : "",
+            technologiesText: typeof item.technologiesText === "string" ? item.technologiesText : "",
+          };
+        }),
+      };
+    },
+    toPayload: (values) => {
+      const payload: CvProjectsInput = {
+        projects: values.projects.map((item) => ({
+          name: item.name,
+          description: item.description,
+          url: item.url,
+          technologies: item.technologiesText
+            .split("\n")
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0),
+        })),
+      };
+
+      const validated = cvProjectsSchema.safeParse(payload);
+      return validated.success ? validated.data : null;
+    },
+    save: createAutoSaveFetcher(`/api/cv/${cvId}/projects`),
+    onUnauthorized: () => router.push("/login"),
   });
 
   async function onSubmit(values: ProjectsFormValues): Promise<void> {
@@ -195,6 +260,7 @@ export function ProjectsForm({ cvId, initialValues }: ProjectsFormProps) {
           {isSubmitting ? "Menyimpan..." : "Simpan Proyek"}
         </Button>
       </div>
+      <AutoSaveIndicator status={autoSave.status} lastSavedAt={autoSave.lastSavedAt} />
 
       {serverError ? <p className="text-sm text-red-600">{serverError}</p> : null}
       {successMessage ? <p className="text-sm text-green-700">{successMessage}</p> : null}

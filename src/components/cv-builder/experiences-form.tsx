@@ -4,7 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 
+import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
+import { useAutoSave } from "@/hooks/use-auto-save";
+import { createAutoSaveFetcher } from "@/lib/cv/auto-save-helpers";
 import {
   cvExperiencesSchema,
   type CvExperienceInput,
@@ -57,10 +60,78 @@ export function ExperiencesForm({ cvId, initialValues }: ExperiencesFormProps) {
     register,
     setValue,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<ExperiencesFormValues>({
     mode: "onBlur",
     defaultValues,
+  });
+
+  const autoSave = useAutoSave<ExperiencesFormValues, CvExperiencesInput>({
+    control,
+    reset,
+    storageKey: `cv:${cvId}:experiences`,
+    parseDraft: (draft) => {
+      const fromPayload = cvExperiencesSchema.safeParse(draft);
+
+      if (fromPayload.success) {
+        return {
+          experiences: fromPayload.data.experiences.map((item) => ({
+            ...item,
+            achievementsText: item.achievements.join("\n"),
+          })),
+        };
+      }
+
+      if (!draft || typeof draft !== "object") {
+        return null;
+      }
+
+      const candidate = (draft as { experiences?: unknown }).experiences;
+
+      if (!Array.isArray(candidate)) {
+        return null;
+      }
+
+      return {
+        experiences: candidate.map((item): ExperienceFormItem => {
+          if (!item || typeof item !== "object") {
+            return EMPTY_EXPERIENCE;
+          }
+
+          return {
+            company: typeof item.company === "string" ? item.company : "",
+            position: typeof item.position === "string" ? item.position : "",
+            startDate: typeof item.startDate === "string" ? item.startDate : "",
+            endDate: typeof item.endDate === "string" ? item.endDate : "",
+            isCurrent: typeof item.isCurrent === "boolean" ? item.isCurrent : false,
+            description: typeof item.description === "string" ? item.description : "",
+            achievementsText: typeof item.achievementsText === "string" ? item.achievementsText : "",
+          };
+        }),
+      };
+    },
+    toPayload: (values) => {
+      const payload: CvExperiencesInput = {
+        experiences: values.experiences.map((item) => ({
+          company: item.company,
+          position: item.position,
+          startDate: item.startDate,
+          endDate: item.isCurrent ? "" : item.endDate,
+          isCurrent: item.isCurrent,
+          description: item.description,
+          achievements: item.achievementsText
+            .split("\n")
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0),
+        })),
+      };
+
+      const validated = cvExperiencesSchema.safeParse(payload);
+      return validated.success ? validated.data : null;
+    },
+    save: createAutoSaveFetcher(`/api/cv/${cvId}/experiences`),
+    onUnauthorized: () => router.push("/login"),
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -262,6 +333,7 @@ export function ExperiencesForm({ cvId, initialValues }: ExperiencesFormProps) {
           {isSubmitting ? "Menyimpan..." : "Simpan Pengalaman"}
         </Button>
       </div>
+      <AutoSaveIndicator status={autoSave.status} lastSavedAt={autoSave.lastSavedAt} />
 
       {serverError ? <p className="text-sm text-red-600">{serverError}</p> : null}
       {successMessage ? <p className="text-sm text-green-700">{successMessage}</p> : null}
