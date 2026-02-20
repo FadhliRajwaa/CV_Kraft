@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { cvExperiencesSchema, cvPersonalInfoSchema, cvSummarySchema } from "@/lib/validations/cv";
+import {
+  cvEducationsSchema,
+  cvExperiencesSchema,
+  cvPersonalInfoSchema,
+  cvSummarySchema,
+} from "@/lib/validations/cv";
 
 describe("cvPersonalInfoSchema", () => {
   it("sukses untuk payload valid", () => {
@@ -157,6 +162,59 @@ describe("cvExperiencesSchema", () => {
           isCurrent: false,
           description: "Menangani pengembangan modul pembayaran.",
           achievements: ["Meningkatkan reliabilitas sistem 20%"],
+        },
+      ],
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+});
+
+describe("cvEducationsSchema", () => {
+  it("sukses untuk payload education valid", () => {
+    const parsed = cvEducationsSchema.safeParse({
+      educations: [
+        {
+          institution: "Universitas Indonesia",
+          degree: "S1",
+          fieldOfStudy: "Ilmu Komputer",
+          startDate: "2018-08",
+          endDate: "2022-06",
+          gpa: "3.75",
+        },
+      ],
+    });
+
+    expect(parsed.success).toBe(true);
+  });
+
+  it("gagal jika field required pendidikan kosong", () => {
+    const parsed = cvEducationsSchema.safeParse({
+      educations: [
+        {
+          institution: "",
+          degree: "",
+          fieldOfStudy: "",
+          startDate: "",
+          endDate: "",
+          gpa: "",
+        },
+      ],
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
+  it("gagal jika endDate lebih awal dari startDate", () => {
+    const parsed = cvEducationsSchema.safeParse({
+      educations: [
+        {
+          institution: "Universitas Indonesia",
+          degree: "S1",
+          fieldOfStudy: "Ilmu Komputer",
+          startDate: "2022-08",
+          endDate: "2021-06",
+          gpa: "3.75",
         },
       ],
     });

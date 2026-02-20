@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { FormStepper } from "@/components/cv-builder/form-stepper";
+import { EducationsForm } from "@/components/cv-builder/educations-form";
 import { ExperiencesForm } from "@/components/cv-builder/experiences-form";
 import { PersonalInfoForm } from "@/components/cv-builder/personal-info-form";
 import { SummaryForm } from "@/components/cv-builder/summary-form";
@@ -71,7 +72,25 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
   const experiences = Array.isArray(currentData.experiences)
     ? currentData.experiences
     : DEFAULT_CV_DATA.experiences;
+  const educations = Array.isArray(currentData.educations)
+    ? currentData.educations
+    : DEFAULT_CV_DATA.educations;
   const activeStep = SECTION_TO_STEP[section] ?? 0;
+
+  function renderSectionForm(): React.ReactNode {
+    switch (section) {
+      case "personal-info":
+        return <PersonalInfoForm cvId={id} initialValues={personalInfo} />;
+      case "summary":
+        return <SummaryForm cvId={id} initialValues={{ summary }} />;
+      case "experiences":
+        return <ExperiencesForm cvId={id} initialValues={{ experiences }} />;
+      case "educations":
+        return <EducationsForm cvId={id} initialValues={{ educations }} />;
+      default:
+        return <p className="text-sm text-gray-600">Form untuk section ini akan tersedia di story berikutnya.</p>;
+    }
+  }
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-7xl p-6 lg:p-8">
@@ -87,15 +106,7 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
         </aside>
 
         <article className="rounded-lg border border-gray-200 p-6">
-          {section === "summary" ? (
-            <SummaryForm cvId={id} initialValues={{ summary }} />
-          ) : section === "personal-info" ? (
-            <PersonalInfoForm cvId={id} initialValues={personalInfo} />
-          ) : section === "experiences" ? (
-            <ExperiencesForm cvId={id} initialValues={{ experiences }} />
-          ) : (
-            <p className="text-sm text-gray-600">Form untuk section ini akan tersedia di story berikutnya.</p>
-          )}
+          {renderSectionForm()}
         </article>
       </section>
     </main>
