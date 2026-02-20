@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { FormStepper } from "@/components/cv-builder/form-stepper";
+import { ExperiencesForm } from "@/components/cv-builder/experiences-form";
 import { PersonalInfoForm } from "@/components/cv-builder/personal-info-form";
 import { SummaryForm } from "@/components/cv-builder/summary-form";
 import { AUTH_SESSION_COOKIE_NAME, parseAuthSession } from "@/lib/auth/session";
@@ -67,6 +68,9 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
     ...currentData.personalInfo,
   };
   const summary = currentData.summary ?? DEFAULT_CV_DATA.summary;
+  const experiences = Array.isArray(currentData.experiences)
+    ? currentData.experiences
+    : DEFAULT_CV_DATA.experiences;
   const activeStep = SECTION_TO_STEP[section] ?? 0;
 
   return (
@@ -87,6 +91,8 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
             <SummaryForm cvId={id} initialValues={{ summary }} />
           ) : section === "personal-info" ? (
             <PersonalInfoForm cvId={id} initialValues={personalInfo} />
+          ) : section === "experiences" ? (
+            <ExperiencesForm cvId={id} initialValues={{ experiences }} />
           ) : (
             <p className="text-sm text-gray-600">Form untuk section ini akan tersedia di story berikutnya.</p>
           )}

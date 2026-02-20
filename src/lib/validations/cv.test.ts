@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cvPersonalInfoSchema, cvSummarySchema } from "@/lib/validations/cv";
+import { cvExperiencesSchema, cvPersonalInfoSchema, cvSummarySchema } from "@/lib/validations/cv";
 
 describe("cvPersonalInfoSchema", () => {
   it("sukses untuk payload valid", () => {
@@ -85,6 +85,80 @@ describe("cvSummarySchema", () => {
   it("gagal jika summary kosong", () => {
     const parsed = cvSummarySchema.safeParse({
       summary: "",
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+});
+
+describe("cvExperiencesSchema", () => {
+  it("sukses untuk payload experiences valid", () => {
+    const parsed = cvExperiencesSchema.safeParse({
+      experiences: [
+        {
+          company: "PT Maju Jaya",
+          position: "Software Engineer",
+          startDate: "2022-01",
+          endDate: "2024-12",
+          isCurrent: false,
+          description: "Mengembangkan fitur aplikasi web untuk internal perusahaan.",
+          achievements: ["Meningkatkan performa halaman hingga 35%"],
+        },
+      ],
+    });
+
+    expect(parsed.success).toBe(true);
+  });
+
+  it("gagal jika field required pengalaman kosong", () => {
+    const parsed = cvExperiencesSchema.safeParse({
+      experiences: [
+        {
+          company: "",
+          position: "",
+          startDate: "",
+          endDate: "",
+          isCurrent: false,
+          description: "",
+          achievements: [],
+        },
+      ],
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
+  it("gagal jika achievement berisi string kosong", () => {
+    const parsed = cvExperiencesSchema.safeParse({
+      experiences: [
+        {
+          company: "PT Maju Jaya",
+          position: "Software Engineer",
+          startDate: "2022-01",
+          endDate: "",
+          isCurrent: true,
+          description: "Menangani pengembangan modul pembayaran.",
+          achievements: [""],
+        },
+      ],
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
+  it("gagal jika endDate lebih awal dari startDate", () => {
+    const parsed = cvExperiencesSchema.safeParse({
+      experiences: [
+        {
+          company: "PT Maju Jaya",
+          position: "Software Engineer",
+          startDate: "2024-06",
+          endDate: "2023-12",
+          isCurrent: false,
+          description: "Menangani pengembangan modul pembayaran.",
+          achievements: ["Meningkatkan reliabilitas sistem 20%"],
+        },
+      ],
     });
 
     expect(parsed.success).toBe(false);
