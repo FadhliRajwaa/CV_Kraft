@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CV_SECTION_KEYS,
   cvCertificationsSchema,
   cvEducationsSchema,
   cvExperiencesSchema,
+  cvLanguageSchema,
   cvPersonalInfoSchema,
   cvProjectsSchema,
+  cvSectionOrderSchema,
   cvSkillsSchema,
   cvSummarySchema,
 } from "@/lib/validations/cv";
@@ -308,5 +311,42 @@ describe("cvProjectsSchema", () => {
     });
 
     expect(parsed.success).toBe(false);
+  });
+});
+
+describe("cvSectionOrderSchema", () => {
+  it("sukses jika urutan section lengkap dan valid", () => {
+    const parsed = cvSectionOrderSchema.safeParse({
+      sectionOrder: [...CV_SECTION_KEYS],
+    });
+
+    expect(parsed.success).toBe(true);
+  });
+
+  it("gagal jika ada duplikasi section", () => {
+    const parsed = cvSectionOrderSchema.safeParse({
+      sectionOrder: [
+        "personal-info",
+        "summary",
+        "experiences",
+        "educations",
+        "skills",
+        "certifications",
+        "certifications",
+      ],
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+});
+
+describe("cvLanguageSchema", () => {
+  it("sukses untuk language id/en", () => {
+    expect(cvLanguageSchema.safeParse({ language: "id" }).success).toBe(true);
+    expect(cvLanguageSchema.safeParse({ language: "en" }).success).toBe(true);
+  });
+
+  it("gagal untuk language di luar enum", () => {
+    expect(cvLanguageSchema.safeParse({ language: "jp" }).success).toBe(false);
   });
 });

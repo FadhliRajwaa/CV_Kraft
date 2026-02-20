@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+export const CV_SECTION_KEYS = [
+  "personal-info",
+  "summary",
+  "experiences",
+  "educations",
+  "skills",
+  "certifications",
+  "projects",
+] as const;
+
 const optionalUrlField = z.union([z.literal(""), z.url("URL tidak valid")]).default("");
 
 export const cvPersonalInfoSchema = z.object({
@@ -127,6 +137,29 @@ export const cvProjectsSchema = z.object({
   projects: z.array(cvProjectItemSchema).max(30, "Proyek maksimal 30 entri"),
 });
 
+export const cvSectionOrderSchema = z
+  .object({
+    sectionOrder: z.array(z.enum(CV_SECTION_KEYS)).length(CV_SECTION_KEYS.length, "Urutan section tidak lengkap"),
+  })
+  .refine((data) => new Set(data.sectionOrder).size === CV_SECTION_KEYS.length, {
+    message: "Urutan section mengandung duplikasi",
+    path: ["sectionOrder"],
+  });
+
+export const CV_SECTION_LABELS: Record<(typeof CV_SECTION_KEYS)[number], { id: string; en: string }> = {
+  "personal-info": { id: "Data Pribadi", en: "Personal Info" },
+  summary: { id: "Ringkasan", en: "Summary" },
+  experiences: { id: "Pengalaman", en: "Experience" },
+  educations: { id: "Pendidikan", en: "Education" },
+  skills: { id: "Keahlian", en: "Skills" },
+  certifications: { id: "Sertifikasi", en: "Certifications" },
+  projects: { id: "Proyek", en: "Projects" },
+};
+
+export const cvLanguageSchema = z.object({
+  language: z.enum(["id", "en"]),
+});
+
 export type CvPersonalInfoInput = z.input<typeof cvPersonalInfoSchema>;
 export type CvPersonalInfoOutput = z.output<typeof cvPersonalInfoSchema>;
 export type CvSummaryInput = z.input<typeof cvSummarySchema>;
@@ -140,3 +173,5 @@ export type CvCertificationInput = z.input<typeof cvCertificationItemSchema>;
 export type CvCertificationsInput = z.input<typeof cvCertificationsSchema>;
 export type CvProjectInput = z.input<typeof cvProjectItemSchema>;
 export type CvProjectsInput = z.input<typeof cvProjectsSchema>;
+export type CvSectionOrderInput = z.input<typeof cvSectionOrderSchema>;
+export type CvLanguageInput = z.input<typeof cvLanguageSchema>;

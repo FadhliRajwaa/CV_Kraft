@@ -5,6 +5,7 @@ import { FormStepper } from "@/components/cv-builder/form-stepper";
 import { CertificationsForm } from "@/components/cv-builder/certifications-form";
 import { EducationsForm } from "@/components/cv-builder/educations-form";
 import { ExperiencesForm } from "@/components/cv-builder/experiences-form";
+import { LanguageSelector } from "@/components/cv-builder/language-selector";
 import { PersonalInfoForm } from "@/components/cv-builder/personal-info-form";
 import { ProjectsForm } from "@/components/cv-builder/projects-form";
 import { SkillsForm } from "@/components/cv-builder/skills-form";
@@ -12,24 +13,40 @@ import { SummaryForm } from "@/components/cv-builder/summary-form";
 import { AUTH_SESSION_COOKIE_NAME, parseAuthSession } from "@/lib/auth/session";
 import { createDefaultCvData, type CvData } from "@/lib/cv/default-data";
 import { prisma } from "@/lib/prisma";
+import { CV_SECTION_KEYS, CV_SECTION_LABELS } from "@/lib/validations/cv";
 
 type EditorPageProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ section?: string }>;
 };
 
+type SectionKey = (typeof CV_SECTION_KEYS)[number];
+
 const DEFAULT_CV_DATA = createDefaultCvData();
 const DEFAULT_PERSONAL_INFO = DEFAULT_CV_DATA.personalInfo;
 
-const SECTION_TO_STEP: Record<string, number> = {
-  "personal-info": 0,
-  summary: 1,
-  experiences: 2,
-  educations: 3,
-  skills: 4,
-  certifications: 5,
-  projects: 6,
-};
+function arrayOrDefault<T>(value: unknown, fallback: T[]): T[] {
+  return Array.isArray(value) ? value : fallback;
+}
+
+function sanitizeSectionOrder(value: unknown): SectionKey[] {
+  if (!Array.isArray(value)) {
+    return [...CV_SECTION_KEYS];
+  }
+
+  const candidate = value.filter((item): item is SectionKey =>
+    typeof item === "string" && (CV_SECTION_KEYS as readonly string[]).includes(item),
+  );
+
+  const isComplete = candidate.length === CV_SECTION_KEYS.length;
+  const isUnique = new Set(candidate).size === CV_SECTION_KEYS.length;
+
+  if (!isComplete || !isUnique) {
+    return [...CV_SECTION_KEYS];
+  }
+
+  return candidate;
+}
 
 export default async function EditorPage({ params, searchParams }: EditorPageProps) {
   const { id } = await params;
@@ -48,6 +65,7 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
     select: {
       userId: true,
       title: true,
+      language: true,
       data: true,
     },
   });
@@ -59,7 +77,6 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
 
   if (cv.userId !== session.userId) {
     redirect("/dashboard");
-    return null;
   }
 
   const currentData =
@@ -72,18 +89,13 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
     ...currentData.personalInfo,
   };
   const summary = currentData.summary ?? DEFAULT_CV_DATA.summary;
-  const experiences = Array.isArray(currentData.experiences)
-    ? currentData.experiences
-    : DEFAULT_CV_DATA.experiences;
-  const educations = Array.isArray(currentData.educations)
-    ? currentData.educations
-    : DEFAULT_CV_DATA.educations;
-  const skills = Array.isArray(currentData.skills) ? currentData.skills : DEFAULT_CV_DATA.skills;
-  const certifications = Array.isArray(currentData.certifications)
-    ? currentData.certifications
-    : DEFAULT_CV_DATA.certifications;
-  const projects = Array.isArray(currentData.projects) ? currentData.projects : DEFAULT_CV_DATA.projects;
-  const activeStep = SECTION_TO_STEP[section] ?? 0;
+  const experiences = arrayOrDefault(currentData.experiences, DEFAULT_CV_DATA.experiences);
+  const educations = arrayOrDefault(currentData.educations, DEFAULT_CV_DATA.educations);
+  const skills = arrayOrDefault(currentData.skills, DEFAULT_CV_DATA.skills);
+  const certifications = arrayOrDefault(currentData.certifications, DEFAULT_CV_DATA.certifications);
+  const projects = arrayOrDefault(currentData.projects, DEFAULT_CV_DATA.projects);
+  const orderedSections = sanitizeSectionOrder(currentData.sectionOrder);
+  const language = cv.language === "en" ? "en" : "id";
 
   function renderSectionForm(): React.ReactNode {
     switch (section) {
@@ -116,11 +128,23 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
       <section className="grid gap-6 lg:grid-cols-[minmax(280px,380px)_1fr]">
         <aside className="space-y-4 rounded-lg border border-gray-200 p-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-600">Form Section</h2>
-          <FormStepper activeStep={activeStep} cvId={id} />
+          <LanguageSelector cvId={id} value={language} />
+          <FormStepper activeSection={section} cvId={id} language={language} orderedSections={orderedSections} />
         </aside>
 
-        <article className="rounded-lg border border-gray-200 p-6">
+        <article className="space-y-6 rounded-lg border border-gray-200 p-6">
           {renderSectionForm()}
+
+          <section className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-600">
+              {language === "en" ? "Preview Headers" : "Preview Header"}
+            </h2>
+            <ul className="space-y-1 text-sm text-gray-700">
+              {orderedSections.map((sectionKey) => (
+                <li key={sectionKey}>• {CV_SECTION_LABELS[sectionKey][language]}</li>
+              ))}
+            </ul>
+          </section>
         </article>
       </section>
     </main>

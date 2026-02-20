@@ -1,3 +1,5 @@
+import { CV_SECTION_KEYS } from "@/lib/validations/cv";
+
 export type CvData = {
   personalInfo: {
     fullName: string;
@@ -41,6 +43,7 @@ export type CvData = {
     technologies: string[];
     url: string;
   }>;
+  sectionOrder: string[];
 };
 
 export function createDefaultCvData(): CvData {
@@ -59,5 +62,6 @@ export function createDefaultCvData(): CvData {
     skills: [],
     certifications: [],
     projects: [],
+    sectionOrder: [...CV_SECTION_KEYS],
   };
 }

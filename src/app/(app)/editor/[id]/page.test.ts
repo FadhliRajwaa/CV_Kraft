@@ -81,6 +81,8 @@ describe("EditorPage", () => {
     findCvMock.mockResolvedValueOnce({
       userId: "user-2",
       title: "CV Orang Lain",
+      language: "id",
+      data: {},
     });
 
     await EditorPage({
@@ -96,6 +98,8 @@ describe("EditorPage", () => {
     findCvMock.mockResolvedValueOnce({
       userId: "user-1",
       title: "CV Tanpa Judul",
+      language: "id",
+      data: {},
     });
 
     const result = await EditorPage({
