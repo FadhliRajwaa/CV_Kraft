@@ -1,6 +1,6 @@
 # Story 1.3: Email Login
 
-Status: review
+Status: done
 
 ## Story
 

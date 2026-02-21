@@ -7,6 +7,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { useCvEditor } from "@/components/cv-builder/cv-editor-context";
 import { createAutoSaveFetcher, createSchemaValidator } from "@/lib/cv/auto-save-helpers";
 import {
   cvCertificationsSchema,
@@ -32,6 +33,7 @@ export function CertificationsForm({ cvId, initialValues }: CertificationsFormPr
   const [serverError, setServerError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
+  const { updateCvData } = useCvEditor();
 
   const {
     control,
@@ -59,6 +61,7 @@ export function CertificationsForm({ cvId, initialValues }: CertificationsFormPr
     toPayload: certificationsValidator,
     save: createAutoSaveFetcher(`/api/cv/${cvId}/certifications`),
     onUnauthorized: () => router.push("/login"),
+    onDraftChange: (draft) => updateCvData({ certifications: draft.certifications.map(d => ({...d, url: d.url || undefined})) }),
   });
 
   async function onSubmit(values: CvCertificationsInput): Promise<void> {

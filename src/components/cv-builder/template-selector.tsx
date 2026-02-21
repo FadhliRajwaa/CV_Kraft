@@ -3,22 +3,25 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { DEFAULT_TEMPLATE_ID, isTemplateId, TEMPLATES, type TemplateId } from "@/lib/templates/registry";
+import { TEMPLATES, type TemplateId } from "@/lib/templates/registry";
+import { useCvEditor } from "@/components/cv-builder/cv-editor-context";
 
 type TemplateSelectorProps = {
   cvId: string;
-  value: string;
+  value?: string;
 };
 
-export function TemplateSelector({ cvId, value }: TemplateSelectorProps) {
+export function TemplateSelector({ cvId }: TemplateSelectorProps) {
   const router = useRouter();
+  const { templateId: activeTemplateId, setTemplateId } = useCvEditor();
   const [savingTemplateId, setSavingTemplateId] = useState<string | null>(null);
 
   async function handleTemplateSelect(nextTemplateId: TemplateId): Promise<void> {
-    if (nextTemplateId === value || savingTemplateId !== null) {
+    if (nextTemplateId === activeTemplateId || savingTemplateId !== null) {
       return;
     }
 
+    setTemplateId(nextTemplateId);
     setSavingTemplateId(nextTemplateId);
 
     try {
@@ -40,8 +43,6 @@ export function TemplateSelector({ cvId, value }: TemplateSelectorProps) {
       setSavingTemplateId(null);
     }
   }
-
-  const activeTemplateId = isTemplateId(value) ? value : DEFAULT_TEMPLATE_ID;
 
   return (
     <div className="space-y-2">

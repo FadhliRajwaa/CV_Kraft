@@ -1,7 +1,16 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
+import dynamic from "next/dynamic";
+import { CvEditorProvider } from "@/components/cv-builder/cv-editor-context";
 import { FormStepper } from "@/components/cv-builder/form-stepper";
+import { LivePreview } from "@/components/cv-builder/preview/live-preview";
+import { ATSScoreCard } from "@/components/cv-builder/ats-score-card";
+
+const DownloadPdfButton = dynamic(
+  () => import("@/components/cv-builder/download-pdf-button"),
+  { loading: () => <button disabled className="px-4 py-2 bg-gray-200 text-gray-500 rounded-md text-sm font-medium">Menyiapkan PDF...</button> }
+);
 import { CertificationsForm } from "@/components/cv-builder/certifications-form";
 import { EducationsForm } from "@/components/cv-builder/educations-form";
 import { ExperiencesForm } from "@/components/cv-builder/experiences-form";
@@ -14,7 +23,7 @@ import { TemplateSelector } from "@/components/cv-builder/template-selector";
 import { AUTH_SESSION_COOKIE_NAME, parseAuthSession } from "@/lib/auth/session";
 import { createDefaultCvData, type CvData } from "@/lib/cv/default-data";
 import { prisma } from "@/lib/prisma";
-import { CV_SECTION_KEYS, CV_SECTION_LABELS } from "@/lib/validations/cv";
+import { CV_SECTION_KEYS } from "@/lib/validations/cv";
 
 type EditorPageProps = {
   params: Promise<{ id: string }>;
@@ -98,7 +107,20 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
   const projects = arrayOrDefault(currentData.projects, DEFAULT_CV_DATA.projects);
   const orderedSections = sanitizeSectionOrder(currentData.sectionOrder);
   const language = cv.language === "en" ? "en" : "id";
-  const templateId = cv.templateId;
+  const templateId = (cv.templateId as "professional" | "modern" | "minimal") || "professional";
+
+  const initialData: CvData = {
+    ...DEFAULT_CV_DATA,
+    ...currentData,
+    personalInfo,
+    summary,
+    experiences,
+    educations,
+    skills,
+    certifications,
+    projects,
+    sectionOrder: orderedSections,
+  };
 
   function renderSectionForm(): React.ReactNode {
     switch (section) {
@@ -122,14 +144,25 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
   }
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-7xl p-6 lg:p-8">
-      <header className="mb-6 space-y-1">
-        <h1 className="text-2xl font-semibold">Editor CV</h1>
-        <p className="text-sm text-gray-600">ID CV: {id}</p>
+    <CvEditorProvider
+      initialData={initialData}
+      initialLanguage={language}
+      initialTemplateId={templateId}
+    >
+      <main className="mx-auto min-h-screen w-full max-w-7xl p-6 lg:p-8">
+      <header className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold">Editor CV</h1>
+          <p className="text-sm text-gray-600">ID CV: {id}</p>
+        </div>
+        <div>
+          <DownloadPdfButton />
+        </div>
       </header>
 
-      <section className="grid gap-6 lg:grid-cols-[minmax(280px,380px)_1fr]">
+      <section className="grid gap-6 lg:grid-cols-[280px_minmax(400px,500px)_1fr]">
         <aside className="space-y-4 rounded-lg border border-gray-200 p-4">
+          <ATSScoreCard />
           <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-600">Form Section</h2>
           <LanguageSelector cvId={id} value={language} />
           <TemplateSelector cvId={id} value={templateId} />
@@ -138,19 +171,13 @@ export default async function EditorPage({ params, searchParams }: EditorPagePro
 
         <article className="space-y-6 rounded-lg border border-gray-200 p-6">
           {renderSectionForm()}
-
-          <section className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-600">
-              {language === "en" ? "Preview Headers" : "Preview Header"}
-            </h2>
-            <ul className="space-y-1 text-sm text-gray-700">
-              {orderedSections.map((sectionKey) => (
-                <li key={sectionKey}>• {CV_SECTION_LABELS[sectionKey][language]}</li>
-              ))}
-            </ul>
-          </section>
         </article>
+
+        <section className="sticky top-6 hidden h-[calc(100vh-120px)] lg:block">
+          <LivePreview />
+        </section>
       </section>
     </main>
+    </CvEditorProvider>
   );
 }

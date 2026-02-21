@@ -41,51 +41,51 @@ story_location: _bmad-output/implementation-artifacts
 
 development_status:
   # ─── Epic 1: User Authentication & Account Management ───
-  epic-1: in-progress
+  epic-1: done
   1-1-project-setup-database-foundation: done
-  1-2-email-registration: review
-  1-3-email-login: review
-  1-4-google-oauth-login: review
-  1-5-logout-session-management: review
-  1-6-password-reset: review
+  1-2-email-registration: done
+  1-3-email-login: done
+  1-4-google-oauth-login: done
+  1-5-logout-session-management: done
+  1-6-password-reset: done
   epic-1-retrospective: optional
 
   # ─── Epic 2: CV Builder — Guided Form Experience ───
-  epic-2: in-progress
-  2-1-create-new-cv-form-layout: review
-  2-2-personal-info-form: review
-  2-3-professional-summary-form: review
-  2-4-work-experience-form-crud: review
-  2-5-education-form-crud: review
-  2-6-skills-certifications-projects-forms: review
-  2-7-section-ordering-language-selection: review
-  2-8-auto-save: review
+  epic-2: done
+  2-1-create-new-cv-form-layout: done
+  2-2-personal-info-form: done
+  2-3-professional-summary-form: done
+  2-4-work-experience-form-crud: done
+  2-5-education-form-crud: done
+  2-6-skills-certifications-projects-forms: done
+  2-7-section-ordering-language-selection: done
+  2-8-auto-save: done
   epic-2-retrospective: optional
 
   # ─── Epic 3: Live Preview & Template System ───
-  epic-3: in-progress
-  3-1-template-system-selection: review
-  3-2-live-preview-rendering: backlog
-  3-3-template-multi-language-support: backlog
+  epic-3: done
+  3-1-template-system-selection: done
+  3-2-live-preview-rendering: done
+  3-3-template-multi-language-support: done
   epic-3-retrospective: optional
 
   # ─── Epic 4: ATS Score & Keyword Analysis ───
-  epic-4: backlog
-  4-1-ats-score-calculation: backlog
-  4-2-ats-score-improvement-suggestions: backlog
-  4-3-job-description-keyword-matcher: backlog
+  epic-4: done
+  4-1-ats-score-calculation: done
+  4-2-ats-score-improvement-suggestions: done
+  4-3-job-description-keyword-matcher: done
   epic-4-retrospective: optional
 
   # ─── Epic 5: PDF Export ───
-  epic-5: backlog
-  5-1-pdf-generation-download: backlog
-  5-2-pdf-quality-assurance: backlog
+  epic-5: done
+  5-1-pdf-generation-download: done
+  5-2-pdf-quality-assurance: done
   epic-5-retrospective: optional
 
   # ─── Epic 6: CV Dashboard Management ───
-  epic-6: backlog
-  6-1-dashboard-cv-list-view: backlog
-  6-2-dashboard-cv-actions: backlog
+  epic-6: done
+  6-1-dashboard-cv-list-view: done
+  6-2-dashboard-cv-actions: done
   epic-6-retrospective: optional
 
   # ─── Epic 7: Landing Page & Onboarding ───

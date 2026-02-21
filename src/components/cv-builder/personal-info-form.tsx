@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { useCvEditor } from "@/components/cv-builder/cv-editor-context";
 import { createAutoSaveFetcher, createSchemaValidator } from "@/lib/cv/auto-save-helpers";
 import { cvPersonalInfoSchema, type CvPersonalInfoInput } from "@/lib/validations/cv";
 
@@ -77,6 +78,7 @@ export function PersonalInfoForm({ cvId, initialValues }: PersonalInfoFormProps)
   const [serverError, setServerError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
+  const { updateCvData } = useCvEditor();
 
   const {
     control,
@@ -100,6 +102,7 @@ export function PersonalInfoForm({ cvId, initialValues }: PersonalInfoFormProps)
     toPayload: personalInfoValidator,
     save: createAutoSaveFetcher(`/api/cv/${cvId}/personal-info`),
     onUnauthorized: () => router.push("/login"),
+    onDraftChange: (draft) => updateCvData({ personalInfo: draft }),
   });
 
   async function onSubmit(values: CvPersonalInfoInput): Promise<void> {

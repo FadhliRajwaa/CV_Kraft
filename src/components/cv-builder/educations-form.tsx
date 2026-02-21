@@ -7,6 +7,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { useCvEditor } from "@/components/cv-builder/cv-editor-context";
 import { createAutoSaveFetcher, createSchemaValidator } from "@/lib/cv/auto-save-helpers";
 import { cvEducationsSchema, type CvEducationInput, type CvEducationsInput } from "@/lib/validations/cv";
 
@@ -30,6 +31,7 @@ export function EducationsForm({ cvId, initialValues }: EducationsFormProps) {
   const [serverError, setServerError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
+  const { updateCvData } = useCvEditor();
 
   const {
     control,
@@ -57,6 +59,7 @@ export function EducationsForm({ cvId, initialValues }: EducationsFormProps) {
     toPayload: educationsValidator,
     save: createAutoSaveFetcher(`/api/cv/${cvId}/educations`),
     onUnauthorized: () => router.push("/login"),
+    onDraftChange: (draft) => updateCvData({ educations: draft.educations.map(d => ({...d, endDate: d.endDate || undefined, gpa: d.gpa || undefined})) }),
   });
 
   async function onSubmit(values: CvEducationsInput): Promise<void> {

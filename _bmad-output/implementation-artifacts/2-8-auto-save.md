@@ -1,6 +1,6 @@
 # Story 2.8: Auto-Save
 
-Status: review
+Status: done
 
 ## Story
 

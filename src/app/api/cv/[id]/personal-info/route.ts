@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { AUTH_SESSION_COOKIE_NAME, parseAuthSession } from "@/lib/auth/session";
+import { calculateAtsScore } from "@/lib/cv/ats-calculator";
+import type { CvData } from "@/lib/cv/default-data";
 import { prisma } from "@/lib/prisma";
 import { cvPersonalInfoSchema } from "@/lib/validations/cv";
 
@@ -53,10 +55,14 @@ export async function PATCH(request: Request, { params }: RouteContext): Promise
       ? (cv.data as Record<string, unknown>)
       : {};
 
+  const newData = { ...currentData, personalInfo: parsed.data };
+  const atsScore = calculateAtsScore(newData as CvData).total;
+
   await prisma.cV.update({
     where: { id },
     data: {
-      data: { ...currentData, personalInfo: parsed.data },
+      data: newData,
+      atsScore,
     },
   });
 

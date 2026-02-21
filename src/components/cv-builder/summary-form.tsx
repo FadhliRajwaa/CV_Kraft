@@ -8,6 +8,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { useCvEditor } from "@/components/cv-builder/cv-editor-context";
 import { createAutoSaveFetcher, createSchemaValidator } from "@/lib/cv/auto-save-helpers";
 import { cvSummarySchema, type CvSummaryInput } from "@/lib/validations/cv";
 
@@ -23,6 +24,7 @@ export function SummaryForm({ cvId, initialValues }: SummaryFormProps) {
   const [serverError, setServerError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
+  const { updateCvData } = useCvEditor();
 
   const {
     register,
@@ -48,6 +50,7 @@ export function SummaryForm({ cvId, initialValues }: SummaryFormProps) {
     toPayload: summaryValidator,
     save: createAutoSaveFetcher(`/api/cv/${cvId}/summary`),
     onUnauthorized: () => router.push("/login"),
+    onDraftChange: (draft) => updateCvData({ summary: draft.summary }),
   });
 
   async function onSubmit(values: CvSummaryInput): Promise<void> {

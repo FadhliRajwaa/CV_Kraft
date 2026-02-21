@@ -1,6 +1,6 @@
 # Story 3.1: Template System & Selection
 
-Status: review
+Status: done
 
 ## Story
 
@@ -26,18 +26,18 @@ So that I can find the style that best fits my professional brand.
 
 ## Tasks / Subtasks
 
-- [ ] Define template registry and metadata (AC: 1)
-  - [ ] Create `src/lib/templates/registry.ts`
-- [ ] Implement API endpoint for template updates (AC: 2)
-  - [ ] Create `src/app/api/cv/[id]/template/route.ts`
-- [ ] Create Template Selector UI component (AC: 1, 3)
-  - [ ] Create `src/components/cv-builder/template-selector.tsx`
-  - [ ] Use `shadcn/ui` Select or specialized grid selector.
-- [ ] Integrate Selector into Editor Page (AC: 2)
-  - [ ] Update `src/app/(app)/editor/[id]/page.tsx`
-- [ ] Verification (AC: 1, 2, 3)
-  - [ ] Run `npm test`
-  - [ ] Run `npm run lint`
+- [x] Define template registry and metadata (AC: 1)
+  - [x] Create `src/lib/templates/registry.ts`
+- [x] Implement API endpoint for template updates (AC: 2)
+  - [x] Create `src/app/api/cv/[id]/template/route.ts`
+- [x] Create Template Selector UI component (AC: 1, 3)
+  - [x] Create `src/components/cv-builder/template-selector.tsx`
+  - [x] Use `shadcn/ui` Select or specialized grid selector.
+- [x] Integrate Selector into Editor Page (AC: 2)
+  - [x] Update `src/app/(app)/editor/[id]/page.tsx`
+- [x] Verification (AC: 1, 2, 3)
+  - [x] Run `npm test`
+  - [x] Run `npm run lint`
 
 ## Dev Notes
 

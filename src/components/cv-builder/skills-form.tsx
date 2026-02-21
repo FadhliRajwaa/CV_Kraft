@@ -7,6 +7,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { useCvEditor } from "@/components/cv-builder/cv-editor-context";
 import { createAutoSaveFetcher, createSchemaValidator } from "@/lib/cv/auto-save-helpers";
 import { cvSkillsSchema, type CvSkillInput, type CvSkillsInput } from "@/lib/validations/cv";
 
@@ -26,6 +27,7 @@ export function SkillsForm({ cvId, initialValues }: SkillsFormProps) {
   const [serverError, setServerError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
+  const { updateCvData } = useCvEditor();
 
   const {
     control,
@@ -53,6 +55,7 @@ export function SkillsForm({ cvId, initialValues }: SkillsFormProps) {
     toPayload: skillsValidator,
     save: createAutoSaveFetcher(`/api/cv/${cvId}/skills`),
     onUnauthorized: () => router.push("/login"),
+    onDraftChange: (draft) => updateCvData({ skills: draft.skills.map(d => ({...d, category: d.category || undefined})) }),
   });
 
   async function onSubmit(values: CvSkillsInput): Promise<void> {

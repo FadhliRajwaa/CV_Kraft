@@ -7,6 +7,7 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { useCvEditor } from "@/components/cv-builder/cv-editor-context";
 import { createAutoSaveFetcher } from "@/lib/cv/auto-save-helpers";
 import {
   cvExperiencesSchema,
@@ -44,6 +45,7 @@ export function ExperiencesForm({ cvId, initialValues }: ExperiencesFormProps) {
   const [serverError, setServerError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
+  const { updateCvData } = useCvEditor();
 
   const defaultValues = useMemo<ExperiencesFormValues>(
     () => ({
@@ -132,6 +134,7 @@ export function ExperiencesForm({ cvId, initialValues }: ExperiencesFormProps) {
     },
     save: createAutoSaveFetcher(`/api/cv/${cvId}/experiences`),
     onUnauthorized: () => router.push("/login"),
+    onDraftChange: (draft) => updateCvData({ experiences: draft.experiences.map(d => ({...d, endDate: d.endDate || "", isCurrent: d.isCurrent || false, achievements: d.achievementsText.split("\n").map(l => l.trim()).filter(l => l.length > 0)})) }),
   });
 
   const { fields, append, remove } = useFieldArray({

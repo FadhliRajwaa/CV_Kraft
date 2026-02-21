@@ -1,6 +1,6 @@
 # Story 1.4: Google OAuth Login
 
-Status: review
+Status: done
 
 ## Story
 

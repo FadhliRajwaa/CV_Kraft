@@ -1,16 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useCvEditor } from "@/components/cv-builder/cv-editor-context";
 
 type LanguageSelectorProps = {
   cvId: string;
-  value: "id" | "en";
+  value?: "id" | "en";
 };
 
-export function LanguageSelector({ cvId, value }: LanguageSelectorProps) {
+export function LanguageSelector({ cvId }: LanguageSelectorProps) {
   const router = useRouter();
+  const { language, setLanguage } = useCvEditor();
 
   async function handleChange(nextLanguage: "id" | "en"): Promise<void> {
+    setLanguage(nextLanguage);
     const response = await fetch(`/api/cv/${cvId}/language`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -35,7 +38,7 @@ export function LanguageSelector({ cvId, value }: LanguageSelectorProps) {
       <select
         id="cv-language"
         className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-        value={value}
+        value={language}
         onChange={(event) => void handleChange(event.target.value as "id" | "en")}
       >
         <option value="id">Bahasa Indonesia</option>

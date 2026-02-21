@@ -1,6 +1,6 @@
 # Story 2.2: Personal Info Form
 
-Status: review
+Status: done
 
 ## Story
 

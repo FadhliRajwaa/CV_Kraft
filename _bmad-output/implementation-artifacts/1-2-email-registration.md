@@ -1,6 +1,6 @@
 # Story 1.2: Email Registration
 
-Status: review
+Status: done
 
 ## Story
 

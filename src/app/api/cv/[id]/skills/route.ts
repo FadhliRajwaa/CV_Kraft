@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { AUTH_SESSION_COOKIE_NAME, parseAuthSession } from "@/lib/auth/session";
+import { calculateAtsScore } from "@/lib/cv/ats-calculator";
+import type { CvData } from "@/lib/cv/default-data";
 import { prisma } from "@/lib/prisma";
 import { cvSkillsSchema } from "@/lib/validations/cv";
 
@@ -54,6 +56,9 @@ export async function PATCH(request: Request, { params }: RouteContext): Promise
       ? (cv.data as Record<string, unknown>)
       : {};
 
+  const newData = { ...currentData, skills: parsed.data.skills };
+  const atsScore = calculateAtsScore(newData as CvData).total;
+
   const updateResult = await prisma.cV.updateMany({
     where: {
       id,
@@ -61,7 +66,8 @@ export async function PATCH(request: Request, { params }: RouteContext): Promise
       updatedAt: cv.updatedAt,
     },
     data: {
-      data: { ...currentData, skills: parsed.data.skills },
+      data: newData,
+      atsScore,
       updatedAt: new Date(),
     },
   });

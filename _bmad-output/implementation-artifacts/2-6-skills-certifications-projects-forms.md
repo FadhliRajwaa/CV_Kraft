@@ -1,6 +1,6 @@
 # Story 2.6: Skills, Certifications & Projects Forms
 
-Status: review
+Status: done
 
 ## Story
 

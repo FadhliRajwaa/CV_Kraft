@@ -1,6 +1,6 @@
 # Story 1.6: Password Reset
 
-Status: review
+Status: done
 
 ## Story
 

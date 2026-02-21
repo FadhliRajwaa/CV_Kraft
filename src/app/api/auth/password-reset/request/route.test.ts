@@ -22,6 +22,7 @@ function createRequest(body: Record<string, unknown>, ip = "127.0.0.1"): Request
 describe("POST /api/auth/password-reset/request", () => {
   beforeEach(() => {
     requestPasswordResetMock.mockReset();
+    // @ts-expect-error override readonly
     process.env.NODE_ENV = "test";
   });
 

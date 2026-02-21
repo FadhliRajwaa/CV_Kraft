@@ -1,6 +1,6 @@
 # Story 2.7: Section Ordering & Language Selection
 
-Status: review
+Status: done
 
 ## Story
 

@@ -7,6 +7,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { AutoSaveIndicator } from "@/components/cv-builder/auto-save-indicator";
 import { Button } from "@/components/ui/button";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { useCvEditor } from "@/components/cv-builder/cv-editor-context";
 import { createAutoSaveFetcher } from "@/lib/cv/auto-save-helpers";
 import { cvProjectsSchema, type CvProjectInput, type CvProjectsInput } from "@/lib/validations/cv";
 
@@ -36,6 +37,7 @@ export function ProjectsForm({ cvId, initialValues }: ProjectsFormProps) {
   const [serverError, setServerError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
+  const { updateCvData } = useCvEditor();
 
   const {
     control,
@@ -117,6 +119,7 @@ export function ProjectsForm({ cvId, initialValues }: ProjectsFormProps) {
     },
     save: createAutoSaveFetcher(`/api/cv/${cvId}/projects`),
     onUnauthorized: () => router.push("/login"),
+    onDraftChange: (draft) => updateCvData({ projects: draft.projects.map(d => ({...d, url: d.url || undefined, technologies: d.technologiesText.split("\n").map(l => l.trim()).filter(l => l.length > 0)})) }),
   });
 
   async function onSubmit(values: ProjectsFormValues): Promise<void> {

@@ -1,6 +1,6 @@
 # Story 2.1: Create New CV & Form Layout
 
-Status: review
+Status: done
 
 ## Story
 

@@ -5,9 +5,9 @@ export type CvData = {
     fullName: string;
     email: string;
     phone: string;
-    address: string;
-    linkedIn: string;
-    portfolio: string;
+    address?: string;
+    linkedIn?: string;
+    portfolio?: string;
   };
   summary: string;
   experiences: Array<{
@@ -24,24 +24,24 @@ export type CvData = {
     degree: string;
     fieldOfStudy: string;
     startDate: string;
-    endDate: string;
-    gpa: string;
+    endDate?: string;
+    gpa?: string;
   }>;
   skills: Array<{
     name: string;
-    category: string;
+    category?: string;
   }>;
   certifications: Array<{
     name: string;
     issuer: string;
     issueDate: string;
-    url: string;
+    url?: string;
   }>;
   projects: Array<{
     name: string;
     description: string;
     technologies: string[];
-    url: string;
+    url?: string;
   }>;
   sectionOrder: string[];
 };

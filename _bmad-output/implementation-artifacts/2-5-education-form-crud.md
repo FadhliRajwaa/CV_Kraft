@@ -1,6 +1,6 @@
 # Story 2.5: Education Form (CRUD)
 
-Status: review
+Status: done
 
 ## Story
 
