@@ -1,9 +1,15 @@
-import type { ReactNode } from "react";
+import { HeroSection } from "@/components/landing/hero-section";
+import { FeaturesSection } from "@/components/landing/features-section";
+import { TemplatesSection } from "@/components/landing/templates-section";
+import { AtsEducationSection } from "@/components/landing/ats-education-section";
 
-export default function Home(): ReactNode {
+export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center p-8">
-      <h1 className="text-3xl font-semibold">CVKraft Foundation Ready</h1>
+    <main className="flex min-h-screen flex-col items-center justify-between">
+      <HeroSection />
+      <FeaturesSection />
+      <TemplatesSection />
+      <AtsEducationSection />
     </main>
   );
 }

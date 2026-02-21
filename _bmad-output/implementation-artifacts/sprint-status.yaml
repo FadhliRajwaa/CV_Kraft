@@ -89,8 +89,8 @@ development_status:
   epic-6-retrospective: optional
 
   # ─── Epic 7: Landing Page & Onboarding ───
-  epic-7: backlog
-  7-1-landing-page-hero-value-proposition: backlog
-  7-2-landing-page-features-templates-ats-education: backlog
-  7-3-seo-meta-tags: backlog
+  epic-7: done
+  7-1-landing-page-hero-value-proposition: done
+  7-2-landing-page-features-templates-ats-education: done
+  7-3-seo-meta-tags: done
   epic-7-retrospective: optional
